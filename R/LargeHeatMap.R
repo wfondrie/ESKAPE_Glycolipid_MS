@@ -1,6 +1,3 @@
-library(MALDIquant)
-library(MALDIquantForeign)
-library(rafalib)
 library(ggdendro)
 library(gridExtra)
 library(grid)
@@ -9,76 +6,10 @@ library(plyr)
 library(reshape2)
 library(ggplot2)
 library(scales)
+source("R/AnalyzeSpectra.R")
+set.seed(1234)
 
-#############################################################################
-################## Preparing Mass Spectra ###################################
-#############################################################################
-## Any parts with "mypar(x,y)...mypar()" are just plotting mass spectra. I commented out most of these.
-
-
-# Read in mzXML files #######################################################
-file.list <- list.files("data/large/", pattern=".mzXML$",full.names=T)
-spectra <- importMzXml(file.list)
-
-# mypar(4,4)
-# lapply(spectra,plot,xlim=c(400,2000))
-# mypar()
-
-# Normalize MS intensities ##################################################
-spectra2 <- transformIntensity(spectra, method="sqrt")
-mypar(4,4)
-lapply(spectra2,plot,xlim=c(400,2000))
-mypar()
-
-spectra3 <- smoothIntensity(spectra2, method="SavitzkyGolay", halfWindowSize=5)
-# mypar(4,4)
-# lapply(spectra3,plot,xlim=c(400,2000))
-# mypar()
-
-# mypar(4,4)
-# lapply(spectra3, function(x) {
-#   baseline <- estimateBaseline(x, method="SNIP",iterations=60)
-#   plot(x)
-#   lines(baseline,col="red",lwd=2)
-# })
-# mypar()
-
-# Remove Baseline ################################################################
-spectra4 <- removeBaseline(spectra3, method="SNIP", iterations=60)
-# mypar(4,4)
-# lapply(spectra4,plot)
-
-spectra5 <- calibrateIntensity(spectra4,method="TIC")
-# lapply(spectra5, plot)
-
-# Align MS #######################################################################
-spectra6 <- alignSpectra(spectra5,reference = spectra5[[1]])
-# lapply(spectra6, plot)
-# mypar()
-
-# Pick Peaks #####################################################################
-peaks <- detectPeaks(spectra6, SNR=2.2, halfWindowSize=5, method="SuperSmoother")
-# mypar(4,4)
-
-# for (i in 1:length(spectra6)) {
-#   plot(spectra6[[i]])
-#   points(peaks[[i]], col="red", pch=4)
-# }
-
-
-peaks <- binPeaks(peaks, tolerance=0.002) # This bins peaks that are very close together
-
-# Preparing Spectra for dot product ##############################################
-# This small section extracts the sample file name and adjusts it to be the sample name.
-sample <- sapply(spectra6, function(x) metaData(x)$file)
-sample <- gsub(".*\\\\", "", sample)
-sample <- gsub(".mzXML$","",sample)
-sample <- factor(sample)
-
-# Retrieves identified peaks and intensities as a matrix (row = sample, col = m/z, value = intensity)
-features <- intensityMatrix(peaks, spectra6)
-rownames(features) <- sample
-
+features <- AnalyzeSpectra("data/large/", snr = 8)
 
 # Heirarchical cluster of samples
 library("pvclust")
@@ -86,8 +17,6 @@ pv <- pvclust(t(features), method.hclust = "ward.D2",
               method.dist = "euclidean")
 mypar()
 plot(pv, print.num=F)
-
-
 
 # Dot Product ########################################################################################
 # Normalizes all vectors to 1
@@ -123,6 +52,7 @@ df2 <- df2[pv$hclust$order, pv$hclust$order]
 # Add a column with sample name
 df$names <- row.names(df)
 df2$names <- row.names(df2)
+write.csv(df2[nrow(df2):1, ],"results/largeHeatMap.csv")
 
 
 # Making a heatmap ##############################################################################
@@ -135,7 +65,9 @@ df2Melt$names <- factor(df2Melt$names, levels = levels(df2Melt$variable), ordere
 # The plotting functions!
 p <- ggplot(df2Melt, aes(variable,names)) + 
   geom_tile(aes(fill=value), color = "black", size=0.3) +
-  scale_fill_continuous(name = "Spectrum\nSimilarity", low=("white"), high="darkgreen") +
+  scale_fill_gradient2(name = "Spectrum\nSimilarity", 
+                       low="white", mid = "red", high="black",
+                       midpoint = 0.5) +
   theme(axis.text.x = element_text(angle=90, hjust=1),
         axis.text = element_text(color = "black", size = 6),
         panel.background = element_blank(),
@@ -146,7 +78,7 @@ p <- ggplot(df2Melt, aes(variable,names)) +
   guides(fill = guide_colorbar(ticks = F )) +
   coord_fixed(ratio = 1)
 p
-ggsave("results/largeHeatmap_green_ordered.png",width=10,height=10,units="in")
+ggsave("results/largeHeatmap.png",width=10,height=10,units="in")
 
 dData <- dendro_data(as.dendrogram(pv$hclust))
 
@@ -185,7 +117,5 @@ print(xDendro, vp=viewport(0.585, 0.2, x=0.49, y=0.9))
 print(yDendro, vp=viewport(0.2, 0.6, x=0.87, y=0.535))
 print(p, vp=viewport(0.8, 0.8, x=0.4, y=0.53))
 dev.off()
-
-# Fin
 
 
