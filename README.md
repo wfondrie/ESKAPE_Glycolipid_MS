@@ -14,7 +14,7 @@ This repository contains the R scripts used in the analysis seen in "Identificat
 
 ### Session Information
 
-Below is the session information from the published work analysis.
+Below is the session information from the published analysis.
 
 ```R
 > devtools::session_info()
