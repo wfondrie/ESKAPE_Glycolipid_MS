@@ -15,13 +15,13 @@ pv <- pvclust(t(features), method.hclust = "ward.D2",
               method.dist = "euclidean")
 plot(pv, print.num=F)
 
-# Dot Product ##################################################################
+# Dot Product ------------------------------------------------------------------
 # Normalizes all vectors to 1
 normFeatures <- aaply(features,1,function(x) x/sqrt(x %*% x))
 
 dot <- normFeatures %*% t(normFeatures)
 
-# Correct Names ################################################################
+# Correct Names ----------------------------------------------------------------
 # Reorder names to ESKAPE order
 ord <- unique(c(grep("faecium", rownames(dot), value = T, ignore.case = T),
                 grep("aureus", rownames(dot), value = T, ignore.case = T),
@@ -44,7 +44,7 @@ df$names <- factor(row.names(df), levels = ord)
 labels <- gsub(" \\(colistin-resistant\\)","\\*", df$names)
 
 
-# Making a heatmap #############################################################
+# Making a heatmap -------------------------------------------------------------
 # Reformats wide dataframe to long form for plotting with ggplot
 dfMelt <- melt(df)
 dfMelt$names <- factor(dfMelt$names)

@@ -11,14 +11,13 @@ set.seed(1234)
 
 features <- AnalyzeSpectra("data/large/", snr = 8)
 
-# Heirarchical cluster of samples
+# Heirarchical cluster of samples ----------------------------------------------
 library("pvclust")
 pv <- pvclust(t(features), method.hclust = "ward.D2",
               method.dist = "euclidean")
-mypar()
 plot(pv, print.num=F)
 
-# Dot Product ########################################################################################
+# Dot Product ------------------------------------------------------------------
 # Normalizes all vectors to 1
 normFeatures <- aaply(features,1,function(x) x/sqrt(x %*% x))
 dot <- normFeatures %*% t(normFeatures)
@@ -28,34 +27,13 @@ df <- as.data.frame(dot)
 df2 <- df
 df2 <- df2[pv$hclust$order, pv$hclust$order]
 
-# The part below would have been used to match a file name to key
-### Match file names to Organism name ### Uncomment for once names are updated!
-# keyRough <- read.xlsx("data/large/ESKAPE library spectra DB.xlsx",1, stringsAsFactors =F)
-# keyLeft <- keyRough[,1:8]
-# keyRight <- keyRough[,10:17]
-# 
-# names(keyLeft)[2:8] <- keyLeft[1, 2:8]
-# names(keyRight) <- names(keyLeft)
-# key <- merge(keyLeft,keyRight, all = T)
-# key <- key[!is.na(key[,1]) & !is.na(key[,5]),]
-# 
-# newName <- lapply(row.names(df2), function(x) {
-#   match <- grepl(paste0("^",x,"$"),key[,"Heat map number"], ignore.case = T)
-#   r <- key[match,"Heat map name"] 
-#   r
-# })
-# 
-# row.names(df2) <- names(df2) <- newName
-
-#########################################
-
 # Add a column with sample name
 df$names <- row.names(df)
 df2$names <- row.names(df2)
 write.csv(df2[nrow(df2):1, ],"results/largeHeatMap.csv")
 
 
-# Making a heatmap ##############################################################################
+# Making a heatmap -------------------------------------------------------------
 # Reformats wide dataframe to long form for plotting with ggplot
 dfMelt <- melt(df)
 df2Melt <- melt(df2)
