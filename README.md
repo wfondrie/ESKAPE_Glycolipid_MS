@@ -4,9 +4,16 @@ This repository contains the R scripts used in the analysis seen in "Identificat
 
 
 ### Files
+#### Helper functions
+- **analyzeSpectra.R** - Contains the main function used for preprocessing the glycolipid mass spectra analysed in **LargeHeatmap.R** and **SmallHeatMap.R**. 
 
-- **analyzeSpectra.R** - Script that contains the main function used for preprocessing the glycolipid mass spectra analysed in **LargeHeatmap.R** and **SmallHeatMap.R**. 
+- **extractPeaks.R** - Contains the function used to extract *m/z*, relative intensity, and sample data from a MassPeaks object in the MALDIQuant package into a data frame. This function is used in **ResistanceAnalysisKp.R** and **ResistanceAnalysisAb.R**.  
 
+- **libraryDotProduct.R** - Takes a long-formatted data frame containing one or multiple test spectra and a long-formatted data frame containing one or multiple library spectra and computes the a dot product between each test spectra and library spectra. The result is a wide-formatted data frame with rows containing each test sample and columns that contain the calculated dot product for each library spectrum. This function is used in **ResistanceAnalysisKp.R** and **ResistanceAnalysisAb.R**.  
+  
+
+
+#### Analysis Scripts
 - **LargeHeatMap.R** - Script that creates the heatmap comparing many glycolipid mass spectra by dot product (Supplementary Figure 5 in paper).  
 
 - **SmallHeatMap.R** - Script that creates the ESKAPE pathogen heatmap (Figure 2 in paper) by comparing glycolipid mass spectra by dot product.  
