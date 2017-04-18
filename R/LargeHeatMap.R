@@ -71,7 +71,7 @@ theme_none <- theme(
   axis.line = element_blank(),
   axis.ticks = element_blank(),
   plot.margin = unit(c(0,0,0,0), "cm"),
-  panel.margin = unit(c(0,0,0,0), "lines")
+  panel.spacing = unit(c(0,0,0,0), "lines")
 )
 
 

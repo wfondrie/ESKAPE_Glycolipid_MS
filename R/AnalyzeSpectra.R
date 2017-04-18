@@ -19,20 +19,20 @@ AnalyzeSpectra <- function(path,snr){
   spectra <- importMzXml(file.list)
 
   # Normalize MS intensities ---------------------------------------------------
-  spectra2 <- transformIntensity(spectra, method="sqrt")
-  spectra3 <- smoothIntensity(spectra2, method="SavitzkyGolay", halfWindowSize=5)
+  spectra2 <- transformIntensity(spectra, method = "sqrt")
+  spectra3 <- smoothIntensity(spectra2, method="SavitzkyGolay", halfWindowSize = 10)
 
   # Remove Baseline ------------------------------------------------------------
-  spectra4 <- removeBaseline(spectra3, method="SNIP", iterations=60)
+  spectra4 <- removeBaseline(spectra3, method = "SNIP", iterations = 60)
   
-  spectra5 <- calibrateIntensity(spectra4,method="TIC")
+  spectra5 <- calibrateIntensity(spectra4, method = "TIC")
   
   # Align MS -------------------------------------------------------------------
   spectra6 <- alignSpectra(spectra5,reference = spectra5[[1]])
   
   # Pick Peaks -----------------------------------------------------------------
-  peaks <- detectPeaks(spectra6, SNR=snr, halfWindowSize=5, method="MAD")
-  peaks <- binPeaks(peaks, tolerance=0.002) # This bins peaks that are very close together
+  peaks <- detectPeaks(spectra6, SNR = snr, halfWindowSize = 10, method = "MAD")
+  peaks <- binPeaks(peaks, tolerance = 0.5)
   
   # Preparing Spectra for dot product ------------------------------------------
   # This small section extracts the sample file name and adjusts it to be the sample name.

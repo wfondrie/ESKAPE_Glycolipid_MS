@@ -6,14 +6,9 @@ source("R/AnalyzeSpectra.R")
 set.seed(1234)
 
 # Imports spectra, normalizes and performs peak picking. Check 
-# <functions/AnalyzeSpectra.R> for details
+# <AnalyzeSpectra.R> for details
 
 features <- AnalyzeSpectra("data/small", snr = 8)
-
-library("pvclust")
-pv <- pvclust(t(features), method.hclust = "ward.D2",
-              method.dist = "euclidean")
-plot(pv, print.num=F)
 
 # Dot Product ------------------------------------------------------------------
 # Normalizes all vectors to 1
@@ -41,7 +36,7 @@ write.csv(dfwrite, "results/smallHeatMap.csv")
 # make names good for heatmap
 df <- as.data.frame(dot)
 df$names <- factor(row.names(df), levels = ord)
-labels <- gsub(" \\(colistin-resistant\\)","\\*", df$names)
+#labels <- gsub(" \(colistin-resistant\)","\*", df$names)
 
 
 # Making a heatmap -------------------------------------------------------------
@@ -65,8 +60,8 @@ p <- ggplot(dfMelt, aes(variable,names)) +
         axis.title = element_blank(),
         text = element_text(size = 18, color = "black")) +
   guides(fill = guide_colorbar(ticks = F )) +
-  scale_x_discrete(labels = labels) +
-  scale_y_discrete(labels = labels) +
+  #scale_x_discrete(labels = labels) +
+  #scale_y_discrete(labels = labels) +
   coord_fixed(ratio = 1)  
  
 p
